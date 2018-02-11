@@ -50,6 +50,10 @@ As reference speed, I set 100mph (I started with 40 then tried 80, finally I set
 
 The number of the calculated points (N) and the timestep delay are two factors that greatly determines the controller's accuracy and stability. I played a lot with these values and I found that below 0.1s it is not really worth it as the controller delay is 100ms anyway. Slowing it down (to 0.2s or below), however, made the car wobble a lot, especially at high speeds. Increasing N increases the number of variables and through this, the computational cost. As we calculate the points after each step I tried to reduce it as much as possible (although on my high-end machine the computational cost was negligable, on slower, embedded systems it might be a good idea to spare as many resources as possible). So I ended up calculating only 8 points. Below that, the controller became instable (especially in the strongest curves) but 8 seems to be enough.
 
+# Result
+
+I uploaded my results to YouTube. The link is https://youtu.be/ea6QNoLF9vE
+
 # Conclusions
 
 This is the third controller which we had to design for this project and this is the most sophisticated of them. For the first time I was able to drive the car with 100mph easily without any sudden jerks or faults. The mathematics behind this controller are not easy at all but the results are quite impressive. I will definitely try this in my own robot project, too.
