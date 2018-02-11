@@ -92,20 +92,49 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
-          /*
-          * TODO: Calculate steering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-          double steer_value;
-          double throttle_value;
+          vector<double> ptsx_car;
+          vector<double> ptsy_car;
+
+          // transform waypoints to be from car's perspective
+          // this means we can consider px = 0, py = 0, and psi = 0
+          // greatly simplifying future calculations
+          for (unsigned int i = 0; i < ptsx.size(); i++) {
+            double dx = ptsx[i] - px;
+            double dy = ptsy[i] - py;
+            ptsx_car.push_back(dx * cos(-psi) - dy * sin(-psi));
+            ptsy_car.push_back(dx * sin(-psi) + dy * cos(-psi));
+//            cout << "(" << ptsx_car[i] << "," << ptsy_car[i] << ")" << endl;
+          }
+
+          // polyfit works with Eigen::VectorXd structures, so convert from the simple vector<double>
+          Eigen::Map<Eigen::VectorXd> waypoints_x_eig(ptsx_car.data(), 6);
+          Eigen::Map<Eigen::VectorXd> waypoints_y_eig(ptsy_car.data(), 6);
+
+          //fitting a 3rd order polynomial
+          auto coeffs = polyfit(waypoints_x_eig, waypoints_y_eig, 3);
+          double cte = polyeval(coeffs, 0);  // px = 0, py = 0
+          double epsi = -atan(coeffs[1]);  // p
+
+          // get actual steer angle and throttle from emulator
+          double steer_value = j[1]["steering_angle"];
+          double throttle_value = j[1]["throttle"];
+
+          // compute the new steer angle and throttle to minimize the cost function in MPC class
+          Eigen::VectorXd state(6);
+          state << 0, 0, 0, v, cte, epsi;
+          auto vars = mpc.Solve(state, coeffs);
+          // result from solving the optimization problem
+          steer_value = vars[0]/0.436332;
+          throttle_value = vars[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           msgJson["steering_angle"] = steer_value;
+          std::cout<<steer_value<<std::endl;
           msgJson["throttle"] = throttle_value;
+          std::cout<<throttle_value<<std::endl;
+          
 
           //Display the MPC predicted trajectory 
           vector<double> mpc_x_vals;
@@ -113,6 +142,13 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
+          for (unsigned int i = 2; i < vars.size(); i++) {
+            if (i % 2 == 0) {
+              mpc_x_vals.push_back(vars[i]);
+            } else {
+              mpc_y_vals.push_back(vars[i]);
+            }
+          }
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
@@ -123,13 +159,17 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          for (double i = 0; i < 100; i += 3) {
+            next_x_vals.push_back(i);
+            next_y_vals.push_back(polyeval(coeffs, i));
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.
