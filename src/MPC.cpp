@@ -32,14 +32,14 @@ size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
 // coefficients for the cost
-const double c_cte    = 3000;
-const double c_epsi   = 3000;
-const double c_v      = 4;
-const double c_delta  = 5;
-const double c_a      = 5;
-const double c_ddelta = 200;
-const double c_da     = 10;
-const double c_vd     = 2000;
+const double c_cte    = 750;
+const double c_epsi   = 750;
+const double c_v      = 1;
+const double c_delta  = 1;
+const double c_a      = 1;
+const double c_ddelta = 50;
+const double c_da     = 5; 
+const double c_vd     = 400;
 
 
 class FG_eval {
