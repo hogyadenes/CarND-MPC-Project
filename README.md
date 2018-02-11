@@ -38,11 +38,15 @@ double epsi = -atan(coeffs[1]);
       fg[0] += c_da     * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 ```
-The parameters ´c_cte´, ´c_epsi´, ´c_v´, ´c_delta´, ´c_a´, ´c_vd´, ´c_ddelta´ and ´c_da´ are the relative weights to scale each error term appropriately in the final cost sum. Terms with higher weights will have major, terms with lower weights will have minor influence on the car's behaviour.
+The parameters ´c_cte´, ´c_epsi´, ´c_v´, ´c_delta´, ´c_a´, ´c_vd´, ´c_ddelta´ and ´c_da´ are the relative weights to scale each error term appropriately in the final cost sum. Terms with higher weights will have major, terms with lower weights will have minor influence on the car's behaviour. One of the above terms, `steering angle` * `velocity`, was not used in the class materials, I got a hint from a fellow student (Ernesto Cullen) that it might help reducing the wobbles - and, in fact, it helped a lot. The weight coefficients then were tuned manually. 
 
 5. The output of the solver contains the control parameters (steering angle and throttle) and the calculated waypoints (for displaying them in the simulator - the reference trajectory is yellow, the calculated is green). 
 
+![example](mpc1.jpg)
 
+# Conclusions
+
+This is the third controller which we had to design for this project and this is the most sophisticated of them. For the first time I was able to drive the car with 100mph easily without any sudden jerks or faults. The mathematics behind this controller are not easy at all but the results are quite impressive. I will definitely try this in my own robot project, too.
 
 ---
 ## Basic Build Instructions
